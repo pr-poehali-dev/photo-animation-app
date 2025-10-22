@@ -3,11 +3,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import Icon from '@/components/ui/icon';
 
 export default function Index() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<{before: string, after: string, effect: string} | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processedImage, setProcessedImage] = useState<string | null>(null);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -23,6 +28,20 @@ export default function Index() {
     if (file) {
       setSelectedFile(file);
     }
+  };
+
+  const handleProcess = () => {
+    setIsProcessing(true);
+    setTimeout(() => {
+      setProcessedImage('https://v3b.fal.media/files/b/penguin/94mAzWgHbJXlzKrlpVGXn_output.png');
+      setIsProcessing(false);
+      setIsModalOpen(true);
+    }, 2000);
+  };
+
+  const openImageModal = (item: {before: string, after: string, effect: string}) => {
+    setSelectedImage(item);
+    setIsModalOpen(true);
   };
 
   const features = [
@@ -162,7 +181,12 @@ export default function Index() {
           <p className="text-center text-muted-foreground mb-12 text-lg">Посмотрите, как AI преображает фотографии</p>
           <div className="grid md:grid-cols-3 gap-8">
             {galleryItems.map((item, index) => (
-              <Card key={index} className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 animate-fade-in" style={{ animationDelay: `${index * 0.15}s` }}>
+              <Card 
+                key={index} 
+                className="overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 animate-fade-in cursor-pointer" 
+                style={{ animationDelay: `${index * 0.15}s` }}
+                onClick={() => openImageModal(item)}
+              >
                 <CardContent className="p-0 relative group">
                   <div className="aspect-square overflow-hidden">
                     <img 
@@ -176,7 +200,10 @@ export default function Index() {
                       <Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0 mb-2">
                         {item.effect}
                       </Badge>
-                      <p className="text-white text-sm">До и после обработки</p>
+                      <p className="text-white text-sm flex items-center gap-2">
+                        До и после обработки
+                        <Icon name="Maximize2" size={16} />
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -206,9 +233,22 @@ export default function Index() {
                   </div>
                   <p className="text-lg font-medium">{selectedFile.name}</p>
                   <div className="flex gap-4 justify-center">
-                    <Button className="bg-gradient-to-r from-primary to-secondary text-white">
-                      Обработать фото
-                      <Icon name="Wand2" className="ml-2" size={18} />
+                    <Button 
+                      className="bg-gradient-to-r from-primary to-secondary text-white"
+                      onClick={handleProcess}
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? (
+                        <>
+                          Обработка...
+                          <Icon name="Loader2" className="ml-2 animate-spin" size={18} />
+                        </>
+                      ) : (
+                        <>
+                          Обработать фото
+                          <Icon name="Wand2" className="ml-2" size={18} />
+                        </>
+                      )}
                     </Button>
                     <Button variant="outline" onClick={() => setSelectedFile(null)}>
                       Выбрать другое
@@ -365,6 +405,56 @@ export default function Index() {
           </div>
         </div>
       </footer>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-5xl p-0 overflow-hidden">
+          <DialogHeader className="p-6 pb-0">
+            <DialogTitle className="text-2xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              {selectedImage ? selectedImage.effect : 'Результат обработки'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="p-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="text-sm">Оригинал</Badge>
+                </div>
+                <div className="aspect-square rounded-2xl overflow-hidden bg-muted">
+                  <img 
+                    src={selectedImage?.before || (selectedFile ? URL.createObjectURL(selectedFile) : '')}
+                    alt="До обработки"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0">
+                    После обработки
+                  </Badge>
+                </div>
+                <div className="aspect-square rounded-2xl overflow-hidden bg-muted relative group">
+                  <img 
+                    src={selectedImage?.after || processedImage || ''}
+                    alt="После обработки"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 flex gap-3 justify-end">
+              <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+                Закрыть
+              </Button>
+              <Button className="bg-gradient-to-r from-primary to-secondary text-white">
+                <Icon name="Download" className="mr-2" size={18} />
+                Скачать результат
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
