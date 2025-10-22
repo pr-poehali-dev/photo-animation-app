@@ -4,7 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
+import ImageCompareSlider from '@/components/ImageCompareSlider';
 
 export default function Index() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -414,35 +416,58 @@ export default function Index() {
             </DialogTitle>
           </DialogHeader>
           <div className="p-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Badge variant="outline" className="text-sm">Оригинал</Badge>
+            <Tabs defaultValue="slider" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="slider" className="gap-2">
+                  <Icon name="GitCompare" size={16} />
+                  Слайдер сравнения
+                </TabsTrigger>
+                <TabsTrigger value="sidebyside" className="gap-2">
+                  <Icon name="Columns2" size={16} />
+                  Рядом
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="slider" className="mt-0">
+                <ImageCompareSlider 
+                  beforeImage={selectedImage?.before || (selectedFile ? URL.createObjectURL(selectedFile) : '')}
+                  afterImage={selectedImage?.after || processedImage || ''}
+                />
+              </TabsContent>
+              
+              <TabsContent value="sidebyside" className="mt-0">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="text-sm">Оригинал</Badge>
+                    </div>
+                    <div className="aspect-square rounded-2xl overflow-hidden bg-muted">
+                      <img 
+                        src={selectedImage?.before || (selectedFile ? URL.createObjectURL(selectedFile) : '')}
+                        alt="До обработки"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0">
+                        После обработки
+                      </Badge>
+                    </div>
+                    <div className="aspect-square rounded-2xl overflow-hidden bg-muted relative group">
+                      <img 
+                        src={selectedImage?.after || processedImage || ''}
+                        alt="После обработки"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                    </div>
+                  </div>
                 </div>
-                <div className="aspect-square rounded-2xl overflow-hidden bg-muted">
-                  <img 
-                    src={selectedImage?.before || (selectedFile ? URL.createObjectURL(selectedFile) : '')}
-                    alt="До обработки"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0">
-                    После обработки
-                  </Badge>
-                </div>
-                <div className="aspect-square rounded-2xl overflow-hidden bg-muted relative group">
-                  <img 
-                    src={selectedImage?.after || processedImage || ''}
-                    alt="После обработки"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-                </div>
-              </div>
-            </div>
+              </TabsContent>
+            </Tabs>
+            
             <div className="mt-6 flex gap-3 justify-end">
               <Button variant="outline" onClick={() => setIsModalOpen(false)}>
                 Закрыть
