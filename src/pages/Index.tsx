@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import ImageCompareSlider from '@/components/ImageCompareSlider';
+import ZoomableImage from '@/components/ZoomableImage';
 
 export default function Index() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -441,11 +442,10 @@ export default function Index() {
                     <div className="flex items-center justify-between">
                       <Badge variant="outline" className="text-sm">Оригинал</Badge>
                     </div>
-                    <div className="aspect-square rounded-2xl overflow-hidden bg-muted">
-                      <img 
+                    <div className="aspect-square bg-muted">
+                      <ZoomableImage 
                         src={selectedImage?.before || (selectedFile ? URL.createObjectURL(selectedFile) : '')}
                         alt="До обработки"
-                        className="w-full h-full object-cover"
                       />
                     </div>
                   </div>
@@ -455,13 +455,11 @@ export default function Index() {
                         После обработки
                       </Badge>
                     </div>
-                    <div className="aspect-square rounded-2xl overflow-hidden bg-muted relative group">
-                      <img 
+                    <div className="aspect-square bg-muted">
+                      <ZoomableImage 
                         src={selectedImage?.after || processedImage || ''}
                         alt="После обработки"
-                        className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                     </div>
                   </div>
                 </div>
